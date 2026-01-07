@@ -19,9 +19,13 @@
 
 1. Open the project in Xcode
 2. Navigate to: `WeatherDashboardTemplate/ViewModel/WeatherService.swift`
-3. Find line 12: `private let apiKey = "8xxxxxxxxxxxxxxxxxxxxx8"`
+3. Find line 11: `private let apiKey = "8xxxxxxxxxxxxxxxxxxxxx8"`
 4. Replace with your actual API key: `private let apiKey = "YOUR_ACTUAL_API_KEY_HERE"`
-5. Save the file (⌘S)
+5. Navigate to: `WeatherDashboardTemplate/ViewModel/LocationManager.swift`
+6. Find line 26: `private let apiKey = "8xxxxxxxxxxxxxxxxxxxxx8"`
+7. Replace with your actual API key: `private let apiKey = "YOUR_ACTUAL_API_KEY_HERE"`
+8. **Important**: Use the SAME API key in both files!
+9. Save both files (⌘S)
 
 ### 3. Build and Run
 

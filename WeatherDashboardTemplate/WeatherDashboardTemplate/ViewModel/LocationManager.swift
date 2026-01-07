@@ -9,30 +9,76 @@ import Foundation
 import CoreLocation
 @preconcurrency import MapKit
 
+// MARK: - Geocoding Response Models
+struct GeocodingResponse: Codable {
+    let name: String
+    let lat: Double
+    let lon: Double
+    let country: String?
+    let state: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case name, lat, lon, country, state
+    }
+}
 
 @MainActor
 final class LocationManager {
+    private let apiKey = "8xxxxxxxxxxxxxxxxxxxxx8"
 
     func geocodeAddress(_ address: String) async throws -> (name: String, lat: Double, lon: Double) {
-        // Uses `CLGeocoder` to convert a string address into geographic coordinates.
-        // Extracts the name, latitude, and longitude from the first resulting placemark.
+        // Uses OpenWeather Geocoding API to convert a string address into geographic coordinates.
+        // Extracts the name, latitude, and longitude from the first result.
         // Throws a `WeatherMapError.geocodingFailed` if no valid location can be found.
         
-        let geocoder = CLGeocoder()
+        // Check if API key is still placeholder
+        guard !apiKey.contains("xxx") else {
+            throw WeatherMapError.missingData(message: "API key not configured. Please add your OpenWeather API key in LocationManager.swift")
+        }
+        
+        guard var components = URLComponents(string: "http://api.openweathermap.org/geo/1.0/direct") else {
+            throw WeatherMapError.invalidURL
+        }
+        
+        components.queryItems = [
+            URLQueryItem(name: "q", value: address),
+            URLQueryItem(name: "limit", value: "1"),
+            URLQueryItem(name: "appid", value: apiKey)
+        ]
+        
+        guard let url = components.url else {
+            throw WeatherMapError.invalidURL
+        }
         
         do {
-            let placemarks = try await geocoder.geocodeAddressString(address)
+            let (data, response) = try await URLSession.shared.data(from: url)
             
-            guard let placemark = placemarks.first,
-                  let location = placemark.location else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw WeatherMapError.invalidResponse
+            }
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                throw WeatherMapError.invalidResponse
+            }
+            
+            let results = try JSONDecoder().decode([GeocodingResponse].self, from: data)
+            
+            guard let result = results.first else {
                 throw WeatherMapError.geocodingFailed
             }
             
-            let name = placemark.locality ?? placemark.name ?? address
-            let lat = location.coordinate.latitude
-            let lon = location.coordinate.longitude
+            // Use the full name with state/country if available for better display
+            var displayName = result.name
+            if let state = result.state {
+                displayName += ", \(state)"
+            }
+            if let country = result.country {
+                displayName += ", \(country)"
+            }
             
-            return (name: name, lat: lat, lon: lon)
+            return (name: displayName, lat: result.lat, lon: result.lon)
+        } catch let error as WeatherMapError {
+            throw error
         } catch {
             throw WeatherMapError.geocodingFailed
         }

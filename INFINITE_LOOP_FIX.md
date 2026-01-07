@@ -16,27 +16,32 @@ Error: Failed to load 'London'. Reverting to London
 1. **Infinite Loop**: App was trying to load London → failing → reverting to London → failing again
 2. **Missing API Key**: The weather API key is still a placeholder
 3. **Too Many Geocoding Requests**: Error handling was triggering new requests
+4. **Wrong Geocoding API**: Was using Apple's CLGeocoder (rate limited to 50/min) instead of OpenWeather Geocoding API
 
 ## What I Fixed
 
+✅ **Switched to OpenWeather Geocoding API** (no rate limits!)
 ✅ Added `isInitializing` flag to prevent revert loops during startup
 ✅ Changed error handling to show helpful message instead of infinite retries
 ✅ Added fallback to existing saved places before attempting default
 ✅ Prevented recursive revert calls
+✅ Added API key validation in both WeatherService and LocationManager
 
 ## What You Need to Do NOW
 
-### Step 1: Add Your API Key (REQUIRED)
+### Step 1: Add Your API Key (REQUIRED - Two Places!)
 
-Open `WeatherService.swift` and replace this line:
-```swift
-private let apiKey = "8xxxxxxxxxxxxxxxxxxxxx8"
-```
-
-With your actual API key:
+**File 1: `WeatherService.swift`** (line 11):
 ```swift
 private let apiKey = "YOUR_ACTUAL_API_KEY_HERE"
 ```
+
+**File 2: `LocationManager.swift`** (line 26):
+```swift
+private let apiKey = "YOUR_ACTUAL_API_KEY_HERE"
+```
+
+**Important**: Use the **SAME API KEY** in both files!
 
 **Get API Key**: https://openweathermap.org/api/one-call-3
 
