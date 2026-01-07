@@ -22,6 +22,7 @@ final class MainAppViewModel: ObservableObject {
     @Published var activePlaceName: String = ""
     private let defaultPlaceName = "London"
     @Published var selectedTab: Int = 0
+    private var isInitializing = false
 
     /// Create and use a WeatherService model (class) to manage fetching and decoding weather data
     private let weatherService = WeatherService()
@@ -48,12 +49,16 @@ final class MainAppViewModel: ObservableObject {
         // First launch: no data → perform full London setup
         if visited.isEmpty {
             Task {
+                isInitializing = true
                 await loadDefaultLocation()
+                isInitializing = false
             }
         } else if let mostRecent = visited.first {
             // Otherwise, load most recently used place
             Task {
+                isInitializing = true
                 await loadLocation(fromPlace: mostRecent)
+                isInitializing = false
             }
         }
     }
@@ -80,7 +85,12 @@ final class MainAppViewModel: ObservableObject {
         do {
             try await loadLocation(byName: defaultPlaceName)
         } catch {
-            appError = .networkError(error)
+            // During initialization, just show error without reverting
+            if isInitializing {
+                appError = .missingData(message: "Failed to load default location. Please check your internet connection and try searching for a location.")
+            } else {
+                appError = .networkError(error)
+            }
         }
     }
 
@@ -157,7 +167,12 @@ final class MainAppViewModel: ObservableObject {
             appError = .missingData(message: "Location '\(name)' added successfully!")
             
         } catch {
-            await revertToDefaultWithAlert(message: "Failed to load '\(byName)'. Reverting to \(defaultPlaceName).")
+            // Only revert if not during initialization
+            if !isInitializing {
+                await revertToDefaultWithAlert(message: "Failed to load '\(byName)'. Reverting to \(defaultPlaceName).")
+            } else {
+                appError = .missingData(message: "Failed to load '\(byName)'. Please check the location name and your internet connection.")
+            }
             throw error
         }
     }
@@ -181,8 +196,21 @@ final class MainAppViewModel: ObservableObject {
 
     private func revertToDefaultWithAlert(message: String) async {
         // Sets an `appError` with the given message, then calls `loadDefaultLocation()` to switch back to the default.
+        // Only revert if we're not already trying to load the default
         appError = .missingData(message: message)
-        await loadDefaultLocation()
+        
+        // Check if there's an existing valid place to fall back to
+        if let fallback = visited.first, fallback.name.lowercased() != activePlaceName.lowercased() {
+            await loadLocation(fromPlace: fallback)
+        } else if !isInitializing {
+            // Only try to load default if not already initializing
+            do {
+                try await loadLocation(byName: defaultPlaceName)
+            } catch {
+                // If default also fails, just show the error
+                appError = .missingData(message: "Unable to load location. Please check your internet connection.")
+            }
+        }
     }
 
     func focus(on coordinate: CLLocationCoordinate2D, zoom: Double = 0.02) {
