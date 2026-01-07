@@ -82,9 +82,12 @@ final class MainAppViewModel: ObservableObject {
     func loadDefaultLocation() async {
         // Attempts to select and load the hardcoded default location name.
         // If an error occurs during selection, sets an app error.
+        print("[MainAppViewModel] Loading default location: \(defaultPlaceName)")
         do {
             try await loadLocation(byName: defaultPlaceName)
+            print("[MainAppViewModel] Default location loaded successfully")
         } catch {
+            print("[MainAppViewModel] Failed to load default location: \(error)")
             // During initialization, just show error without reverting
             if isInitializing {
                 appError = .missingData(message: "Failed to load default location. Please check your internet connection and try searching for a location.")

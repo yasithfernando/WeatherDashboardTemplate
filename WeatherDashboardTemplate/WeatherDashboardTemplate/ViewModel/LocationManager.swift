@@ -36,7 +36,7 @@ final class LocationManager {
             throw WeatherMapError.missingData(message: "API key not configured. Please add your OpenWeather API key in LocationManager.swift")
         }
         
-        guard var components = URLComponents(string: "http://api.openweathermap.org/geo/1.0/direct") else {
+        guard var components = URLComponents(string: "https://api.openweathermap.org/geo/1.0/direct") else {
             throw WeatherMapError.invalidURL
         }
         
@@ -51,19 +51,30 @@ final class LocationManager {
         }
         
         do {
+            print("[LocationManager] Geocoding request for: \(address)")
+            print("[LocationManager] URL: \(url)")
+            
             let (data, response) = try await URLSession.shared.data(from: url)
             
             guard let httpResponse = response as? HTTPURLResponse else {
+                print("[LocationManager] Invalid response type")
                 throw WeatherMapError.invalidResponse
             }
             
+            print("[LocationManager] Status code: \(httpResponse.statusCode)")
+            
             guard (200...299).contains(httpResponse.statusCode) else {
+                if let errorMessage = String(data: data, encoding: .utf8) {
+                    print("[LocationManager] Error response: \(errorMessage)")
+                }
                 throw WeatherMapError.invalidResponse
             }
             
             let results = try JSONDecoder().decode([GeocodingResponse].self, from: data)
+            print("[LocationManager] Found \(results.count) results")
             
             guard let result = results.first else {
+                print("[LocationManager] No results found for: \(address)")
                 throw WeatherMapError.geocodingFailed
             }
             

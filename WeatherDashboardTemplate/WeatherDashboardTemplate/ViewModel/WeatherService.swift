@@ -38,13 +38,22 @@ final class WeatherService {
             throw WeatherMapError.invalidURL
         }
         
+        print("[WeatherService] Fetching weather for lat: \(lat), lon: \(lon)")
+        print("[WeatherService] URL: \(url)")
+        
         let (data, response) = try await URLSession.shared.data(from: url)
         
         guard let httpResponse = response as? HTTPURLResponse else {
+            print("[WeatherService] Invalid response type")
             throw WeatherMapError.invalidResponse
         }
         
+        print("[WeatherService] Status code: \(httpResponse.statusCode)")
+        
         guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorMessage = String(data: data, encoding: .utf8) {
+                print("[WeatherService] Error response: \(errorMessage)")
+            }
             throw WeatherMapError.invalidResponse
         }
         
