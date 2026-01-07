@@ -16,8 +16,41 @@ final class WeatherService {
         // Validates the HTTP response status code.
         // Decodes the received JSON data into a `WeatherResponse` object, using a specific date decoding strategy.
         // Handles and throws specific `WeatherMapError` types for invalid URL, network failure, invalid response, and decoding errors.
-
-        // DUMMY RETURN TO SATISFY COMPILER - you will have your own when the coding is done
-        preconditionFailure("Stubbed function not implemented. Requires a WeatherResponse return.")
+        
+        guard var components = URLComponents(string: "https://api.openweathermap.org/data/3.0/onecall") else {
+            throw WeatherMapError.invalidURL
+        }
+        
+        components.queryItems = [
+            URLQueryItem(name: "lat", value: String(lat)),
+            URLQueryItem(name: "lon", value: String(lon)),
+            URLQueryItem(name: "units", value: "metric"),
+            URLQueryItem(name: "exclude", value: "minutely,hourly,alerts"),
+            URLQueryItem(name: "appid", value: apiKey)
+        ]
+        
+        guard let url = components.url else {
+            throw WeatherMapError.invalidURL
+        }
+        
+        let (data, response) = try await URLSession.shared.data(from: url)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw WeatherMapError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw WeatherMapError.invalidResponse
+        }
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .secondsSince1970
+        
+        do {
+            let weatherResponse = try decoder.decode(WeatherResponse.self, from: data)
+            return weatherResponse
+        } catch {
+            throw WeatherMapError.decodingError(error)
+        }
     }
 }

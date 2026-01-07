@@ -15,7 +15,12 @@ final class Place {
     var name: String
     var latitude: Double
     var longitude: Double
-    var lastUsedAt: Date 
+    var lastUsedAt: Date
+    var createdAt: Date
+    var lastWeatherFetchedAt: Date?
+    
+    @Relationship(deleteRule: .cascade, inverse: \AnnotationModel.place)
+    var annotations: [AnnotationModel] = []
 
     init(
         id: UUID = UUID(),
@@ -28,6 +33,8 @@ final class Place {
         self.latitude = latitude
         self.longitude = longitude
         self.lastUsedAt = .now
+        self.createdAt = .now
+        self.lastWeatherFetchedAt = nil
     }
 }
 
@@ -37,13 +44,13 @@ final class AnnotationModel: Identifiable {
     var name: String
     var latitude: Double
     var longitude: Double
-
+    
+    var place: Place?
 
     init(name: String, latitude: Double, longitude: Double) {
         self.name = name
         self.latitude = latitude
         self.longitude = longitude
-
     }
 
 }
