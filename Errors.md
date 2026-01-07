@@ -1,9 +1,3 @@
-Throttled "PlaceRequest.REQUEST_TYPE_GEOCODING" request: Tried to make more than 50 requests in 60 seconds, will reset in 31 seconds - Error Domain=GEOErrorDomain Code=-3 "(null)" UserInfo={details=(
-        {
-        intervalType = short;
-        maxRequests = 50;
-        "throttler.keyPath" = "app:wmin.girish.WeatherDashboardTemplate/0x20302/short(default/any)";
-        timeUntilReset = 31;
-        windowSize = 60;
-    }
-), requestKindString=PlaceRequest.REQUEST_TYPE_GEOCODING, timeUntilReset=31, requestKind=770}
+Task <A794F159-236D-44F5-816F-BE499081CF3F>.<8123> finished with error [-1022] Error Domain=NSURLErrorDomain Code=-1022 "The resource could not be loaded because the App Transport Security policy requires the use of a secure connection." UserInfo={NSLocalizedDescription=The resource could not be loaded because the App Transport Security policy requires the use of a secure connection., NSErrorFailingURLStringKey=http://api.openweathermap.org/geo/1.0/direct?q=London&limit=1&appid=2a8ad84e24811b65f211e8079a8c2637, NSErrorFailingURLKey=http://api.openweathermap.org/geo/1.0/direct?q=London&limit=1&appid=2a8ad84e24811b65f211e8079a8c2637, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <A794F159-236D-44F5-816F-BE499081CF3F>.<8123>"
+), _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <A794F159-236D-44F5-816F-BE499081CF3F>.<8123>, NSUnderlyingError=0x600000ceebb0 {Error Domain=kCFErrorDomainCFNetwork Code=-1022 "(null)"}}
