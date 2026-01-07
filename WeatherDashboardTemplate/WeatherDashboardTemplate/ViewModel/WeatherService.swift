@@ -17,6 +17,11 @@ final class WeatherService {
         // Decodes the received JSON data into a `WeatherResponse` object, using a specific date decoding strategy.
         // Handles and throws specific `WeatherMapError` types for invalid URL, network failure, invalid response, and decoding errors.
         
+        // Check if API key is still placeholder
+        guard !apiKey.contains("xxx") else {
+            throw WeatherMapError.missingData(message: "API key not configured. Please add your OpenWeather API key in WeatherService.swift")
+        }
+        
         guard var components = URLComponents(string: "https://api.openweathermap.org/data/3.0/onecall") else {
             throw WeatherMapError.invalidURL
         }
