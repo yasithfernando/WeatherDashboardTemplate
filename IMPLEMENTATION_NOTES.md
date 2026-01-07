@@ -26,9 +26,10 @@ This document outlines the complete implementation of the WeatherDashboard iOS a
   - Excludes minutely, hourly, and alerts for efficiency
 
 - **LocationManager**: Geocoding & POI Search
-  - `CLGeocoder` for place name → coordinates conversion
+  - OpenWeather Geocoding API for place name → coordinates conversion
   - `MKLocalSearch` for finding 5 tourist attractions
   - Proper error handling for failed geocoding
+  - Returns full location name with state/country
 
 #### 3. ViewModel (MainAppViewModel)
 Core business logic with all required flows:
@@ -167,9 +168,11 @@ Core business logic with all required flows:
 ## Next Steps Before Submission
 
 ### Required Actions:
-1. **Add Your OpenWeather API Key**:
-   - Open `WeatherService.swift`
+1. **Add Your OpenWeather API Key in TWO Files**:
+   - Open `WeatherService.swift` (line 11)
    - Replace `"8xxxxxxxxxxxxxxxxxxxxx8"` with your actual API key
+   - Open `LocationManager.swift` (line 26)
+   - Replace `"8xxxxxxxxxxxxxxxxxxxxx8"` with the SAME API key
    - Register at: https://openweathermap.org/api
 
 2. **Test on iOS Simulator/Device**:
