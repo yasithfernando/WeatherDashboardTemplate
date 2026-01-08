@@ -8,7 +8,7 @@
 import Foundation
 @MainActor
 final class WeatherService {
-    private let apiKey = "8xxxxxxxxxxxxxxxxxxxxx8"
+    private let apiKey = "2a8ad84e24811b65f211e8079a8c2637"
 
     func fetchWeather(lat: Double, lon: Double) async throws -> WeatherResponse {
         // Constructs a URL for the OpenWeatherMap OneCall API using the provided coordinates and API key.
