@@ -33,13 +33,13 @@ struct WeatherResponse: Codable {
 
 // MARK: - Current
 struct Current: Codable {
-    let dt, sunrise, sunset: Int
+    let dt, sunrise, sunset: Double
     let temp, feelsLike: Double
-    let pressure, humidity: Int
+    let pressure, humidity: Double
     let dewPoint: Double
-    let uvi, clouds, visibility: Int
+    let uvi, clouds, visibility: Double
     let windSpeed: Double
-    let windDeg: Int
+    let windDeg: Double
     let windGust: Double?
     let weather: [Weather]
 
@@ -64,18 +64,18 @@ struct Weather: Codable {
 
 // MARK: - Daily
 struct Daily: Codable {
-    let dt, sunrise, sunset, moonrise: Int
-    let moonset: Int
+    let dt, sunrise, sunset, moonrise: Double
+    let moonset: Double
     let moonPhase: Double
     let summary: String
     let temp: Temp
     let feelsLike: FeelsLike
-    let pressure, humidity: Int
+    let pressure, humidity: Double
     let dewPoint, windSpeed: Double
-    let windDeg: Int
+    let windDeg: Double
     let windGust: Double
     let weather: [Weather]
-    let clouds: Int
+    let clouds: Double
     let pop, uvi: Double
     let rain: Double?
 
