@@ -124,11 +124,11 @@ final class MainAppViewModel: ObservableObject {
             // Geocode the address first to get the canonical name
             let (name, lat, lon) = try await locationManager.geocodeAddress(trimmed)
             
-            // Check if place already exists using geocoded name
+            // Check if place already exists using coordinates (more reliable than name)
             if let existing = visited.first(where: { 
-                $0.name.lowercased() == name.lowercased() 
+                abs($0.latitude - lat) < 0.01 && abs($0.longitude - lon) < 0.01
             }) {
-                print("[MainAppViewModel] Place '\(name)' already exists, loading from storage")
+                print("[MainAppViewModel] Place at (\(lat), \(lon)) already exists as '\(existing.name)', loading from storage")
                 await loadLocation(fromPlace: existing)
                 return
             }
