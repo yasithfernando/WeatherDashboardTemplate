@@ -50,7 +50,7 @@ final class WeatherService {
             print("[WeatherService] Invalid response type - not HTTPURLResponse")
             // Try to decode anyway since we got data
             let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .secondsSince1970
+            // decoder.dateDecodingStrategy = .secondsSince1970
             do {
                 let weatherResponse = try decoder.decode(WeatherResponse.self, from: data)
                 return weatherResponse
@@ -73,7 +73,9 @@ final class WeatherService {
         decoder.dateDecodingStrategy = .secondsSince1970
         
         do {
+            print("decoding data")
             let weatherResponse = try decoder.decode(WeatherResponse.self, from: data)
+            print("decoding done: \(weatherResponse)")
             return weatherResponse
         } catch {
             throw WeatherMapError.decodingError(error)
