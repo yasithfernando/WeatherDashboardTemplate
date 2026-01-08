@@ -121,17 +121,17 @@ final class MainAppViewModel: ObservableObject {
         do {
             let trimmed = byName.trimmingCharacters(in: .whitespacesAndNewlines)
             
-            // Check if place already exists
+            // Geocode the address first to get the canonical name
+            let (name, lat, lon) = try await locationManager.geocodeAddress(trimmed)
+            
+            // Check if place already exists using geocoded name
             if let existing = visited.first(where: { 
-                $0.name.lowercased() == trimmed.lowercased() 
+                $0.name.lowercased() == name.lowercased() 
             }) {
+                print("[MainAppViewModel] Place '\(name)' already exists, loading from storage")
                 await loadLocation(fromPlace: existing)
-                appError = .missingData(message: "Location loaded from storage.")
                 return
             }
-            
-            // Geocode the address
-            let (name, lat, lon) = try await locationManager.geocodeAddress(trimmed)
             
             // Fetch weather as fail-fast validation
             let weatherResponse = try await weatherService.fetchWeather(lat: lat, lon: lon)
@@ -185,9 +185,13 @@ final class MainAppViewModel: ObservableObject {
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
             focus(on: coordinate)
             
-            appError = .missingData(message: "Location '\(name)' added successfully!")
+            // Switch to Now tab to show weather
+            selectedTab = 0
+            
+            print("[MainAppViewModel] Successfully loaded new location: \(name)")
             
         } catch {
+            print("[MainAppViewModel] Error loading location: \(error)")
             // Only revert if not during initialization
             if !isInitializing {
                 await revertToDefaultWithAlert(message: "Failed to load '\(byName)'. Reverting to \(defaultPlaceName).")
@@ -210,6 +214,11 @@ final class MainAppViewModel: ObservableObject {
             try await loadAll(for: place)
             place.lastUsedAt = .now
             try context.save()
+            
+            // Switch to Now tab to show weather
+            selectedTab = 0
+            
+            print("[MainAppViewModel] Successfully loaded place from storage: \(place.name)")
         } catch {
             appError = .networkError(error)
         }
