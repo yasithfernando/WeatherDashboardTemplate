@@ -14,23 +14,59 @@ struct NavBarView: View {
     var body: some View {
         VStack(spacing: 0) {
             // 🔍 Search Bar
-            HStack {
-                TextField("Enter location", text: $vm.query)
-                    .textFieldStyle(.roundedBorder)
-                    .submitLabel(.search)
-                    .onSubmit { vm.submitQuery() } 
-
+            HStack(spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: "location.magnifyingglass")
+                        .foregroundColor(.white.opacity(0.7))
+                        .font(.body)
+                    
+                    TextField("Search location...", text: $vm.query)
+                        .foregroundColor(.white)
+                        .tint(.white)
+                        .submitLabel(.search)
+                        .onSubmit { vm.submitQuery() }
+                    
+                    if !vm.query.isEmpty {
+                        Button {
+                            vm.query = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.white.opacity(0.5))
+                                .font(.body)
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.blue.opacity(0.4), Color.purple.opacity(0.4)]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(12)
+                
                 Button {
                     vm.submitQuery()
                 } label: {
-                    Image(systemName: "magnifyingglass")
-                        .font(.title2)
+                    Image(systemName: "magnifyingglass.circle.fill")
+                        .font(.title)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .clipShape(Circle())
                 }
             }
-            .padding()
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
-            .shadow(radius: 3, y: 2)
-            .padding(.horizontal)
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
 
             // 🌤 Tabs
             TabView(selection: $vm.selectedTab) {
