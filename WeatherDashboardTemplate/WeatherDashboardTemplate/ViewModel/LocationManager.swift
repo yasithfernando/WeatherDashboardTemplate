@@ -24,7 +24,7 @@ struct GeocodingResponse: Codable {
 
 @MainActor
 final class LocationManager {
-    private let apiKey = "2a8ad84e24811b65f211e8079a8c2637"
+    private let apiKey = ""
 
     func geocodeAddress(_ address: String) async throws -> (name: String, lat: Double, lon: Double) {
         // Uses OpenWeather Geocoding API to convert a string address into geographic coordinates.

@@ -8,7 +8,7 @@
 import Foundation
 @MainActor
 final class WeatherService {
-    private let apiKey = "2a8ad84e24811b65f211e8079a8c2637"
+    private let apiKey = ""
 
     func fetchWeather(lat: Double, lon: Double) async throws -> WeatherResponse {
         // Constructs a URL for the OpenWeatherMap OneCall API using the provided coordinates and API key.
@@ -29,9 +29,9 @@ final class WeatherService {
         components.queryItems = [
             URLQueryItem(name: "lat", value: String(lat)),
             URLQueryItem(name: "lon", value: String(lon)),
+            URLQueryItem(name: "appid", value: apiKey),
             URLQueryItem(name: "units", value: "metric"),
-            URLQueryItem(name: "exclude", value: "minutely,hourly,alerts"),
-            URLQueryItem(name: "appid", value: apiKey)
+            URLQueryItem(name: "exclude", value: "minutely,hourly")
         ]
         
         guard let url = components.url else {
@@ -43,9 +43,21 @@ final class WeatherService {
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
+        print("[WeatherService] Response type: \(type(of: response))")
+        print("[WeatherService] Data size: \(data.count) bytes")
+        
         guard let httpResponse = response as? HTTPURLResponse else {
-            print("[WeatherService] Invalid response type")
-            throw WeatherMapError.invalidResponse
+            print("[WeatherService] Invalid response type - not HTTPURLResponse")
+            // Try to decode anyway since we got data
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .secondsSince1970
+            do {
+                let weatherResponse = try decoder.decode(WeatherResponse.self, from: data)
+                return weatherResponse
+            } catch {
+                print("[WeatherService] Decoding failed: \(error)")
+                throw WeatherMapError.decodingError(error)
+            }
         }
         
         print("[WeatherService] Status code: \(httpResponse.statusCode)")
