@@ -136,12 +136,24 @@ final class MainAppViewModel: ObservableObject {
             // Fetch weather as fail-fast validation
             let weatherResponse = try await weatherService.fetchWeather(lat: lat, lon: lon)
             
-            // Extract current weather and forecast
+            // Extract current weather and forecast - THIS MUST HAPPEN FIRST
             self.currentWeather = weatherResponse.current
             self.forecast = Array(weatherResponse.daily.prefix(8))
+            self.activePlaceName = name
             
-            // Find POIs
-            let annotations = try await locationManager.findPOIs(lat: lat, lon: lon, limit: 5)
+            print("[MainAppViewModel] Weather data populated for: \(name)")
+            print("[MainAppViewModel] Current temp: \(weatherResponse.current.temp)°C")
+            print("[MainAppViewModel] Forecast days: \(self.forecast.count)")
+            
+            // Find POIs (non-critical - don't fail if this doesn't work)
+            var annotations: [AnnotationModel] = []
+            do {
+                annotations = try await locationManager.findPOIs(lat: lat, lon: lon, limit: 5)
+                print("[MainAppViewModel] Found \(annotations.count) POIs")
+            } catch {
+                print("[MainAppViewModel] POI search failed (non-critical): \(error)")
+                // Continue without POIs
+            }
             
             // Create new place
             let newPlace = Place(name: name, latitude: lat, longitude: lon)
@@ -155,7 +167,13 @@ final class MainAppViewModel: ObservableObject {
             
             // Insert and save
             context.insert(newPlace)
-            try context.save()
+            do {
+                try context.save()
+                print("[MainAppViewModel] Place saved to database")
+            } catch {
+                print("[MainAppViewModel] Database save failed (non-critical): \(error)")
+                // Continue anyway - weather data is already displayed
+            }
             
             // Update visited array
             visited.insert(newPlace, at: 0)
